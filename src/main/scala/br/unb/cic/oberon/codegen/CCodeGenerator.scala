@@ -112,6 +112,13 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
             s"$variableType ${variable.name}[$length];"
           )
 
+        case PointerType(t) =>
+          val pointerVariableType: String = getPointerType(t, userTypes)
+          userVariablesDoc += textln(
+            localIndent,
+            s"$pointerVariableType ${variable.name};"
+          )
+
         case _ => ()
       }
     }
@@ -158,11 +165,11 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
 
   def getCType(variableType: Type, userTypes: List[UserDefinedType]): String = {
     variableType match {
-      case IntegerType   => "int"
-      case BooleanType   => "bool"
-      case CharacterType => "char"
-      case RealType      => "float"
-      case StringType    => "char*"
+      case IntegerType    => "int"
+      case BooleanType    => "bool"
+      case CharacterType  => "char"
+      case RealType       => "float"
+      case StringType     => "char*"
 
       case ReferenceToUserDefinedType(name) =>
         val userType = stringToType(name, userTypes)
@@ -172,6 +179,27 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
             throw new Exception("Non-exhaustive match in case statement.")
         }
       case _ => throw new Exception("Non-exhaustive match in case statement.")
+    }
+  }
+
+  def getPointerType(pointerType: Type, userTypes: List[UserDefinedType]): String = {
+    pointerType match {
+      case IntegerType   => "int*"
+      case BooleanType   => "bool*"
+      case CharacterType => "char*"
+      case RealType      => "float*"
+      case StringType    => "char**"
+
+      case ReferenceToUserDefinedType(name) => 
+        val userType = stringToType(name, userTypes)
+        userType match {
+          case RecordType(_) => s"${name}*"
+          case ArrayType(_, _)  => s"${name}*" 
+          case _ =>
+              throw new Exception("Non-exaustive match in case statement.")
+        }
+
+      case _ => throw new Exception("Non-supported pointer type.")
     }
   }
 

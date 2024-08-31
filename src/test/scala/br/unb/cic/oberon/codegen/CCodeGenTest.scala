@@ -297,7 +297,7 @@ class CCodeGenTest extends AnyFunSuite {
     testGenerator("stmts/beecrowd1010.oberon")
   }
 
-  ignore("C generator for ForSTMT"){
+  test("C generator for ForSTMT"){
     testGenerator("stmts/forstmt.oberon")
   }
 
@@ -327,5 +327,13 @@ class CCodeGenTest extends AnyFunSuite {
 
   ignore("C generator for Pow Test"){
     testGenerator("stdlib/POWTest.oberon")
+  }
+
+  test("C generator for pointers declaration") {
+    testGenerator("Pointers/pointerDecl1.oberon")
+  }
+
+  test("C generator for user defined types pointers"){
+    testGenerator("Pointers/pointerDecl2.oberon")
   }
 }
