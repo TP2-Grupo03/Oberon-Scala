@@ -5,6 +5,8 @@ import br.unb.cic.oberon.transformations.CoreChecker
 import org.typelevel.paiges.Doc
 import org.typelevel.paiges.Doc._
 
+import scala.collection.mutable.Queue
+
 class NotOberonCoreException(s: String) extends Exception(s) {}
 
 abstract class CCodeGenerator extends CodeGenerator[String] {}
@@ -12,6 +14,10 @@ abstract class CCodeGenerator extends CodeGenerator[String] {}
 case class PaigesBasedGenerator() extends CCodeGenerator {
   val indentSize: Int = 4
   val twoLines: Doc = line * 2
+  var declVars: List[VariableDeclaration] = List()
+  var userTypes: List[UserDefinedType] = List()
+  var allocatedVars: Queue[String] = Queue()
+
 
   override def generateCode(module: OberonModule): String = {
 
@@ -20,8 +26,11 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
         "Não podemos compilar módulo que não seja OberonCore"
       )
 
+    declVars = module.variables
+    userTypes = module.userTypes
+    
     val mainHeader =
-      text("#include <stdio.h>") / text("#include <stdbool.h>") + twoLines
+      text("#include <stdio.h>") / text("#include <stdbool.h>") / text("#include <stdlib.h>") + twoLines
     val procedureDocs = module.procedures.map(procedure =>
       generateProcedure(procedure, module.userTypes)
     )
@@ -31,13 +40,13 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       else empty
     val mainDefines = generateConstants(module.constants)
     val userDefinedTypes = generateUserDefinedTypes(module.userTypes)
-    val globalVars = declareVars(module.variables, module.userTypes, 0)
+    val globalVars = declareVars(declVars, userTypes, 0)
     val mainBody = module.stmt match {
       case Some(stmt) =>
         text("int main() {") / generateStmt(
           stmt,
           indentSize
-        ) + Doc.char('}')
+        ) + freeVars(indentSize) + Doc.char('}')
       case None => text("int main() {}")
     }
 
@@ -174,7 +183,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       case ReferenceToUserDefinedType(name) =>
         val userType = stringToType(name, userTypes)
         userType match {
-          case RecordType(_) => s"struct $name"
+          case RecordType(_) => s"$name"
           case _ =>
             throw new Exception("Non-exhaustive match in case statement.")
         }
@@ -190,7 +199,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       case RealType      => "float*"
       case StringType    => "char**"
 
-      case ReferenceToUserDefinedType(name) => 
+      case ReferenceToUserDefinedType(name) =>
         val userType = stringToType(name, userTypes)
         userType match {
           case RecordType(_) => s"${name}*"
@@ -244,6 +253,25 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
         textln(indent, s"""scanf("%d", &$varName);""")
       case WriteStmt(expression) =>
         textln(indent, s"""printf("%d\\n", ${genExp(expression)});""")
+      case NewStmt(varName) =>
+        val varType = declVars.find(_.name == varName)
+
+        varType match {
+          case Some(variableDeclaration) => 
+            val pointerType = variableDeclaration.variableType match {
+              case PointerType(t) =>
+                getCType(t, userTypes)
+              case _ => 
+                throw new Exception("Non-exaustive match.")
+            }
+
+            // enqueue variables to be free
+            allocatedVars.enqueue(variableDeclaration.name)
+            
+            textln(indent, s"""$varName = (${pointerType}*)malloc(sizeof(${pointerType}));""")
+          case None => 
+            throw new Exception("Variable declaration not found.")
+        }
       case ProcedureCallStmt(name, args) =>
         genProcedureCallStmt(name, args, indent)
       case IfElseStmt(condition, thenStmt, elseStmt) =>
@@ -284,6 +312,8 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
             val structName = genExp(record)
             val value = genExp(exp)
             textln(indent, s"$structName.$atrib = $value;")
+          case PointerAssignment(pointerName) =>             
+            textln(indent, s"*$pointerName = ${genExp(exp)};")
           case _ =>
             throw new Exception("Non-exhaustive match in case statement.")
         }
@@ -337,6 +367,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
         val arrayName = genExp(arrayBase)
         val arrayIndex = genExp(index)
         s"$arrayName[$arrayIndex]"
+      case PointerAccessExpression(name) => s"*$name"
       case _ => throw new Exception("expression not found")
     }
   }
@@ -358,6 +389,22 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
           indentation(indent) + text(name + '('),
           text(");")
         ) + line
+    }
+  }
+
+  def freeVars(indentSize: Int): Doc = {
+    
+    if(!allocatedVars.isEmpty){
+      var freeStmts = Doc.text("")
+      
+      while(!allocatedVars.isEmpty) {
+        var freeVarStmt = allocatedVars.dequeue() 
+        freeStmts = freeStmts + textln(indentSize, s"free($freeVarStmt);")
+      }
+
+      textln("") + freeStmts
+    } else {
+      Doc.text("")
     }
   }
 

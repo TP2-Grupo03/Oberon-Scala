@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 
 int di, df, hi, hf, mi, mf, si, sf, dt, ht, mt, st;

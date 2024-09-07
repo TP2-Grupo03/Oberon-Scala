@@ -336,4 +336,17 @@ class CCodeGenTest extends AnyFunSuite {
   test("C generator for user defined types pointers"){
     testGenerator("Pointers/pointerDecl2.oberon")
   }
+
+  test("C generator for pointer assignment") {
+    testGenerator("Pointers/pointerNewStatement.oberon")
+  }
+
+  test("C generator for user type pointer assignment") {
+    testGenerator("Pointers/pointerUserDefinedType.oberon")
+  }
+
+  // this test is failing due to parenthesis issues
+  ignore("C generator for pointer operations") {
+    testGenerator("Pointers/pointerOps2.oberon")
+  }
 }

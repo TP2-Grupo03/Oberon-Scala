@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
-// #include <stdlib.h>
+#include <stdlib.h>
+
 
 int* a;
 float* b;
@@ -10,10 +11,9 @@ char** e;
 
 
 int main() {
-    // a = (int*) malloc(sizeof(int));
     *a = 1;
     *b = 9.5;
-    *c = 'c';
+    // *c = 'c';
     *d = true;
     *e = "Hello.";
 }

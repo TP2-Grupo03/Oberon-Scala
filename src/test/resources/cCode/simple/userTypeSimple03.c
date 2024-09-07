@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 typedef bool test_array[5];
 struct tipo1_struct {

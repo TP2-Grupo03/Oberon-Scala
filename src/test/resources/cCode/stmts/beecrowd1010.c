@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 
 int prod1cod, prod1qdt, prod1price, prod2cod, prod2qdt, prod2price, total;
