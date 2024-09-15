@@ -355,13 +355,75 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       case LTExpression(left, right)   => s"${genExp(left)} < ${genExp(right)}"
       case GTEExpression(left, right)  => s"${genExp(left)} >= ${genExp(right)}"
       case LTEExpression(left, right)  => s"${genExp(left)} <= ${genExp(right)}"
-      case AddExpression(left, right)  => s"${genExp(left)} + ${genExp(right)}"
-      case SubExpression(left, right)  => s"${genExp(left)} - ${genExp(right)}"
-      case MultExpression(left, right) => s"${genExp(left)} * ${genExp(right)}"
-      case DivExpression(left, right)  => s"${genExp(left)} / ${genExp(right)}"
-      case OrExpression(left, right)   => s"${genExp(left)} || ${genExp(right)}"
-      case AndExpression(left, right)  => s"${genExp(left)} && ${genExp(right)}"
-      case ModExpression(left, right)  => s"${genExp(left)} % ${genExp(right)}"
+      
+      case AddExpression(left, right) =>
+        val currentPrecedence = 3
+        // println("left")
+        val leftExp = genExpWithParens(left, currentPrecedence)
+        // val leftExp = genExp(left)
+        // println("right")
+        val rightExp = genExpWithParens(right, currentPrecedence)
+        // val rightExp = genExp(right)
+        s"$leftExp + $rightExp"
+        
+      case SubExpression(left, right) =>
+        val currentPrecedence = 3
+        // println("left")
+        val leftExp = genExpWithParens(left, currentPrecedence)
+        // val leftExp = genExp(left)
+        // println("right")
+        val rightExp = genExpWithParens(right, currentPrecedence)
+        // val rightExp = genExp(right)
+        s"$leftExp - $rightExp"
+        
+      case MultExpression(left, right) =>
+        val currentPrecedence = 2
+        // println("left")
+        val leftExp = genExpWithParens(left, currentPrecedence)
+        // val leftExp = genExp(left)
+        // println("right")
+        val rightExp = genExpWithParens(right, currentPrecedence)
+        // val rightExp = genExp(right)
+        s"$leftExp * $rightExp"
+        
+      case DivExpression(left, right) =>
+        val currentPrecedence = 2
+        println(s"left: $left")
+        val leftExp = genExpWithParens(left, currentPrecedence)
+        // val leftExp = genExp(left)
+        println(s"right: $right")
+        val rightExp = genExpWithParens(right, currentPrecedence)
+        // val rightExp = genExp(right)
+        s"$leftExp / $rightExp"
+        
+      case ModExpression(left, right) =>
+        val currentPrecedence = 2
+        // println("left")
+        val leftExp = genExpWithParens(left, currentPrecedence)
+        // val leftExp = genExp(left)
+        // println("right")
+        val rightExp = genExpWithParens(right, currentPrecedence)
+        // val rightExp = genExp(right)
+        s"$leftExp % $rightExp"
+      
+      case AndExpression(left, right) =>
+        val currentPrecedence = 4
+        val leftExp = genExpWithParens(left, currentPrecedence)
+        // val leftExp = genExp(left)
+        // val rightExp = genExpWithParens(right, currentPrecedence)
+        val rightExp = genExp(right)
+        s"$leftExp && $rightExp"
+
+      case OrExpression(left, right) =>
+        val currentPrecedence = 5
+        // val leftExp = genExpWithParens(left, currentPrecedence)
+        val leftExp = genExp(left)
+        // val rightExp = genExpWithParens(right, currentPrecedence)
+        val rightExp = genExp(right)
+        s"$leftExp || $rightExp"
+
+      case NotExpression(exp) => s"!$exp"
+
       case FieldAccessExpression(exp, name) => s"${genExp(exp)}.$name"
       case ArraySubscript(arrayBase, index) =>
         val arrayName = genExp(arrayBase)
@@ -370,6 +432,25 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       case PointerAccessExpression(name) => s"*$name"
       case _ => throw new Exception("expression not found")
     }
+  }
+
+  // https://en.cppreference.com/w/c/language/operator_precedence
+  def precedence(exp: Expression): Int = exp match {
+    // lower number means higher precedence
+    case NotExpression(_)                                                 => 1
+    case MultExpression(_, _) | DivExpression(_, _) | ModExpression(_, _) => 2
+    case AddExpression(_, _) | SubExpression(_, _)                        => 3
+    case AndExpression(_, _)                                              => 4
+    case OrExpression(_, _)                                               => 5
+
+    case _                                                                => 0
+  }
+
+  def genExpWithParens(exp: Expression, parentPrecedence: Int): String = {
+    val expPrecedence = precedence(exp)
+    val expStr = genExp(exp)
+    
+    if (expPrecedence > parentPrecedence) s"($expStr)" else expStr
   }
 
   def genProcedureCallStmt(
