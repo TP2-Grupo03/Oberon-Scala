@@ -2,12 +2,12 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-typedef int A[10];
 
-A a;
+int x, y, z;
 
 
 int main() {
-    a[0] = 5;
-    a[1 + 1] = 10 + 15;
+    x = -10;
+    y = abs(x);
+    z = abs(y);
 }

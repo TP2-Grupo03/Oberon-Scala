@@ -4,6 +4,7 @@ import br.unb.cic.oberon.ir.ast._
 import br.unb.cic.oberon.transformations.CoreChecker
 import org.typelevel.paiges.Doc
 import org.typelevel.paiges.Doc._
+import scala.math._
 
 class NotOberonCoreException(s: String) extends Exception(s) {}
 
@@ -21,7 +22,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       )
 
     val mainHeader =
-      text("#include <stdio.h>") / text("#include <stdbool.h>") + twoLines
+      text("#include <math.h>") / text("#include <stdio.h>") / text("#include <stdbool.h>") + twoLines
     val procedureDocs = module.procedures.map(procedure =>
       generateProcedure(procedure, module.userTypes)
     )
@@ -270,6 +271,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
   def genExp(exp: Expression): String = {
     exp match {
       case IntValue(v)    => v.toString
+      // case RealValue(v)   => BigDecimal(v).setScale(1, BigDecimal.RoundingMode.HALF_UP).toString
       case RealValue(v)   => v.toString
       case Brackets(exp)  => s"( ${genExp(exp)} )"
       case BoolValue(v)   => if (v) "true" else "false"
@@ -281,6 +283,20 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
         name match {
           case "ODD" =>
             s"${genExp(args.head)} % 2 == 1"
+          case "ABS" =>
+            s"abs(${genExp(args.head)})"
+          case "CEIL" => 
+            s"ceil(${genExp(args.head)})"
+          case "RND" =>
+            s"round(${genExp(args.head)})"
+          case "FLT" =>
+            s"(float)${genExp(args.head)}"
+          case "POW" =>
+            s"pow(${genExp(args.head)}, ${genExp(args(1))})"
+          case "SQR" =>
+            s"sqrt(${genExp(args.head)})"
+          // stringtoint
+          // stringtoreal
           case _ =>
             val expressions = args.map(arg => text(genExp(arg)))
             val functionArgs = intercalate(Doc.char(',') + space, expressions)

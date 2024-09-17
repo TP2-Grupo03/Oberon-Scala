@@ -4,12 +4,12 @@
 
 
 int y, z;
+float x, w;
 
 
 int main() {
-    y = 0;
-    while (y < 10) {
-        z = z + y;
-    }
-    printf("%d\n", z);
+    w = -0.9;
+    x = 10.4;
+    y = round(x);
+    z = round(w);
 }
