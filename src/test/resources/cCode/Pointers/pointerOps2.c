@@ -13,7 +13,7 @@ int main() {
     b = (int*)malloc(sizeof(int));
     *a = 7;
     *b = 12;
-    c = (*a + *b)*(*b - *a);
+    c = (*a + *b) * (*b - *a);
 
     free(a);
     free(b);

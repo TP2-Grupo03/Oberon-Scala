@@ -358,71 +358,49 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       
       case AddExpression(left, right) =>
         val currentPrecedence = 3
-        // println("left")
         val leftExp = genExpWithParens(left, currentPrecedence)
-        // val leftExp = genExp(left)
-        // println("right")
         val rightExp = genExpWithParens(right, currentPrecedence)
-        // val rightExp = genExp(right)
         s"$leftExp + $rightExp"
         
       case SubExpression(left, right) =>
         val currentPrecedence = 3
-        // println("left")
         val leftExp = genExpWithParens(left, currentPrecedence)
-        // val leftExp = genExp(left)
-        // println("right")
         val rightExp = genExpWithParens(right, currentPrecedence)
-        // val rightExp = genExp(right)
         s"$leftExp - $rightExp"
         
       case MultExpression(left, right) =>
         val currentPrecedence = 2
-        // println("left")
         val leftExp = genExpWithParens(left, currentPrecedence)
-        // val leftExp = genExp(left)
-        // println("right")
         val rightExp = genExpWithParens(right, currentPrecedence)
-        // val rightExp = genExp(right)
         s"$leftExp * $rightExp"
         
       case DivExpression(left, right) =>
         val currentPrecedence = 2
-        println(s"left: $left")
         val leftExp = genExpWithParens(left, currentPrecedence)
-        // val leftExp = genExp(left)
-        println(s"right: $right")
         val rightExp = genExpWithParens(right, currentPrecedence)
-        // val rightExp = genExp(right)
         s"$leftExp / $rightExp"
         
       case ModExpression(left, right) =>
         val currentPrecedence = 2
-        // println("left")
         val leftExp = genExpWithParens(left, currentPrecedence)
-        // val leftExp = genExp(left)
-        // println("right")
         val rightExp = genExpWithParens(right, currentPrecedence)
-        // val rightExp = genExp(right)
         s"$leftExp % $rightExp"
       
       case AndExpression(left, right) =>
         val currentPrecedence = 4
         val leftExp = genExpWithParens(left, currentPrecedence)
-        // val leftExp = genExp(left)
-        // val rightExp = genExpWithParens(right, currentPrecedence)
-        val rightExp = genExp(right)
+        val rightExp = genExpWithParens(right, currentPrecedence)
         s"$leftExp && $rightExp"
 
       case OrExpression(left, right) =>
         val currentPrecedence = 5
-        // val leftExp = genExpWithParens(left, currentPrecedence)
-        val leftExp = genExp(left)
-        // val rightExp = genExpWithParens(right, currentPrecedence)
-        val rightExp = genExp(right)
+        val leftExp = genExpWithParens(left, currentPrecedence)
+        val rightExp = genExpWithParens(right, currentPrecedence)
         s"$leftExp || $rightExp"
 
-      case NotExpression(exp) => s"!$exp"
+      case NotExpression(exp) => 
+        val currentPrecedence = 1
+        s"!${genExpWithParens(exp, currentPrecedence)}"
 
       case FieldAccessExpression(exp, name) => s"${genExp(exp)}.$name"
       case ArraySubscript(arrayBase, index) =>

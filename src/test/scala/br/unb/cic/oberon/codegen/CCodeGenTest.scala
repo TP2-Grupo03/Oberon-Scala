@@ -321,7 +321,7 @@ class CCodeGenTest extends AnyFunSuite {
     testGenerator("stmts/boolNeg.oberon")
   }
 
-  ignore("C generator for Progression Multiple Variable"){
+  test("C generator for Progression Multiple Variable"){
     testGenerator("stmts/progression_mul.oberon")
   }
 
@@ -345,8 +345,11 @@ class CCodeGenTest extends AnyFunSuite {
     testGenerator("Pointers/pointerUserDefinedType.oberon")
   }
 
-  // this test is failing due to parenthesis issues
-  ignore("C generator for pointer operations") {
+  test("C generator for pointer operations") {
     testGenerator("Pointers/pointerOps2.oberon")
+  }
+
+  test("C generator for Or operator precedence over And and Not") {
+    testGenerator("stmts/LogicPrecedence.oberon")
   }
 }

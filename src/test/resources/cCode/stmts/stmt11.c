@@ -11,7 +11,7 @@ int main() {
     y = 0;
     while (y < x) {
         scanf("%d", &z);
-        z = z / y + 1;
+        z = z / (y + 1);
         printf("%d\n", z);
     }
 }

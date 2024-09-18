@@ -12,7 +12,7 @@ int main() {
     y = 0;
     while (y < x) {
         scanf("%d", &w);
-        v = v + w * y + 1;
+        v = v + w * (y + 1);
     }
     v = v / x;
     z = 0;
