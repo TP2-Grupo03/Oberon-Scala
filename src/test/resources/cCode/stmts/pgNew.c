@@ -11,11 +11,10 @@ int main() {
     r = 3;
     N = 5;
     n = 0;
-
     while (n <= N) {
-         p = pow(r, n - 1);
-         pg = a1 * p;
-         printf("%d\n", pg);
-         n = n + 1;
+        p = pow(r, n - 1);
+        pg = a1 * p;
+        printf("%d\n", pg);
+        n = n + 1;
     }
 }
