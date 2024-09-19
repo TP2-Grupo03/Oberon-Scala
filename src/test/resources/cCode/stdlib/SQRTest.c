@@ -3,12 +3,13 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-typedef int A[10];
 
-A a;
+float x, y, z, w;
 
 
 int main() {
-    a[0] = 5;
-    a[1 + 1] = 10 + 15;
+    w = 196.0;
+    x = 10.0;
+    y = sqrt(x);
+    z = sqrt(w);
 }

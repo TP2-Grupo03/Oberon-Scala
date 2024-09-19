@@ -349,7 +349,31 @@ class CCodeGenTest extends AnyFunSuite {
     testGenerator("Pointers/pointerOps2.oberon")
   }
 
-  test("C generator for Or operator precedence over And and Not") {
+  test("C generator for logic operators precedence") {
     testGenerator("stmts/LogicPrecedence.oberon")
+  }
+
+  test("C generator for abs function call"){
+    testGenerator("stdlib/ABSTest.oberon")
+  }
+
+  ignore("C generator for ceil function call"){
+    testGenerator("stdlib/CEILTest.oberon")
+  }
+
+  ignore("C generator for round function call"){
+    testGenerator("stdlib/RNDTest.oberon")
+  }
+
+  test("C generator for float casting"){
+    testGenerator("stdlib/FLTTest.oberon")
+  }
+
+  ignore("C generator for pow call"){
+    testGenerator("stdlib/POWTest.oberon")
+  }
+
+  test("C generator for sqrt call"){
+    testGenerator("stdlib/SQRTest.oberon")
   }
 }
