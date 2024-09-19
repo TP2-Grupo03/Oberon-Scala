@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 
-int pg, a1, r, N, n;
+int pg, a1, r, n, N;
 
 
 int main() {
@@ -13,8 +13,8 @@ int main() {
     N = 5;
     n = 0;
     while (n <= N) {
-         pg = a1 * pow(r, n - 1);
-         printf("%d\n", pg);
-         n = n + 1;
+        pg = a1 * pow(r, n - 1);
+        printf("%d\n", pg);
+        n = n + 1;
     }
 }

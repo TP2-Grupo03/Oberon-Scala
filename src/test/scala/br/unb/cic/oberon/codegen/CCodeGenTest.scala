@@ -309,11 +309,11 @@ class CCodeGenTest extends AnyFunSuite {
     testGenerator("stmts/LogicNot.oberon")
   }
 
-  ignore("C generator for Geometric Progression") {
+  test("C generator for Geometric Progression") {
     testGenerator("stmts/pgNormal.oberon")
   }
 
-  ignore("C generator for Geometric Progression with multiple args") {
+  test("C generator for Geometric Progression with multiple args") {
     testGenerator("stmts/pgNew.oberon")
   }
 
@@ -369,7 +369,7 @@ class CCodeGenTest extends AnyFunSuite {
     testGenerator("stdlib/FLTTest.oberon")
   }
 
-  ignore("C generator for pow call"){
+  test("C generator for pow call"){
     testGenerator("stdlib/POWTest.oberon")
   }
 

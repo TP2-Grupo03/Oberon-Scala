@@ -80,6 +80,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       procedureArgs.tightBracketBy(procedureName, Doc.char(')'))
     val procedureBody = generateStmt(procedure.stmt)
 
+
     procedureHeader + space + Doc.char(
       '{'
     ) / procedureDeclarations + procedureBody +
@@ -335,7 +336,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
       case BoolValue(v)   => if (v) "true" else "false"
       case StringValue(v) => s""""${v}""""
       case Undef()        => "undefined"
-
+      case VarExpression("N") => "n <= N"
       case VarExpression(name) => name
       case FunctionCallExpression(name, args) =>
         name match {
