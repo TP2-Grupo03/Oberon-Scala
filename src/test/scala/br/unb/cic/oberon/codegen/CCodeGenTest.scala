@@ -309,6 +309,19 @@ class CCodeGenTest extends AnyFunSuite {
     testGenerator("stmts/LogicNot.oberon")
   }
 
+  for (i <- 1 to 6) {
+    test(s"C generator for lamba expressions$i") {
+      testGenerator(s"lambda/lambdaExpressions0$i.oberon")
+    }
+  }
+  test(s"C generator for lamba expressions TC") {
+      testGenerator(s"lambda/lambdaExpressionsTC05.oberon")
+    }
+
+  test("C generator for lambda expressions") {
+    testGenerator("lambda/lambdaExpressions01.oberon")
+  }
+
   ignore("C generator for Geometric Progression") {
     testGenerator("stmts/pgNormal.oberon")
   }
