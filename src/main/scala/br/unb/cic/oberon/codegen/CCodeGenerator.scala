@@ -18,7 +18,9 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
   var declVars: List[VariableDeclaration] = List()
   var userTypes: List[UserDefinedType] = List()
   var allocatedVars: Queue[String] = Queue()
-
+  
+  var lambda_index = 0
+  var lambdaFunctions: List[Doc] = List()
 
   override def generateCode(module: OberonModule): String = {
 
@@ -35,10 +37,6 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
     val procedureDocs = module.procedures.map(procedure =>
       generateProcedure(procedure, module.userTypes)
     )
-    val mainProcedures =
-      if (procedureDocs.nonEmpty)
-        intercalate(twoLines, procedureDocs) + twoLines
-      else empty
     val mainDefines = generateConstants(module.constants)
     val userDefinedTypes = generateUserDefinedTypes(module.userTypes)
     val globalVars = declareVars(declVars, userTypes, 0)
@@ -50,6 +48,12 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
         ) + freeVars(indentSize) + Doc.char('}')
       case None => text("int main() {}")
     }
+    //precisa estar após o processamento de mainBody para que lambdaFunctions receba os valores das lambdas
+    val allProcedures = lambdaFunctions ++ procedureDocs
+    val mainProcedures =
+      if (allProcedures.nonEmpty)
+        intercalate(twoLines, allProcedures) + twoLines
+      else empty
 
     val CCode =
       mainHeader + userDefinedTypes / globalVars / mainDefines + mainProcedures / mainBody
@@ -330,6 +334,7 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
   def genExp(exp: Expression): String = {
     exp match {
       case IntValue(v)    => v.toString
+      // round up to 2 decimal digits
       // case RealValue(v)   => BigDecimal(v).setScale(1, BigDecimal.RoundingMode.HALF_UP).toString
       case RealValue(v)   => v.toString
       case Brackets(exp)  => s"( ${genExp(exp)} )"
@@ -366,6 +371,39 @@ case class PaigesBasedGenerator() extends CCodeGenerator {
               )
               .render(10000)
         }
+      case LambdaExpression(args, exp) =>
+            
+            val functionName = s"lambda_${lambda_index}"
+            lambda_index += 1
+
+            val inferredReturnType = args.map {
+                case ParameterByValue(_, argumentType) => argumentType
+                case ParameterByReference(_, argumentType) => argumentType
+              } match {
+                case argTypes if argTypes.contains(RealType) => RealType
+                case argTypes if argTypes.forall(_ == IntegerType) => IntegerType
+                case argTypes if argTypes.contains(BooleanType) => BooleanType
+                case _ => IntegerType // ou outro tipo padrão se necessário
+              }
+
+            //considera que nao será utilizado constants e variables nas lambdas,somente argumentos
+            val procedure = Procedure(
+              name = functionName,
+              args = args,
+              returnType = Some(inferredReturnType),
+              constants = List(),             
+              variables = List(),             
+              stmt = ReturnStmt(exp),         
+            )
+
+            val procedureDoc = generateProcedure(procedure, List())
+            
+            lambdaFunctions = lambdaFunctions :+ procedureDoc
+
+            val functionArgs = args.map(arg => genExp(VarExpression(arg.name))).mkString(", ")
+            //s"$functionName($functionArgs)"
+            s"$functionName"
+
       case EQExpression(left, right)   => s"${genExp(left)} == ${genExp(right)}"
       case NEQExpression(left, right)  => s"${genExp(left)} != ${genExp(right)}"
       case GTExpression(left, right)   => s"${genExp(left)} > ${genExp(right)}"
